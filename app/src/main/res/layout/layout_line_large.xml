@@ -3,17 +3,26 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="100dp">
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
 
     <TextView
         android:id="@+id/tv_value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         tools:text="10"
-        android:textColor="#58c238"/>
+        android:textColor="#58c238"
+        android:layout_gravity="center_horizontal"
+        android:visibility="gone"/>
 
     <View
+        android:id="@+id/view_line"
         android:layout_width="2dp"
         android:layout_height="25dp"
-        android:background="#58c238"/>
+        android:background="#58c238"
+        android:layout_gravity="bottom"/>
 </LinearLayout>
