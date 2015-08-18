@@ -1,4 +1,4 @@
-package com.moldedbits.horizontaldialer;
+package com.moldedbits.pickerknob;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -8,15 +8,14 @@ import android.graphics.Paint;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 
 /**
- * Created by shubham on 13/08/15.
+ * Picker widget shaped like a knob.
  */
-public class SelectorDialer extends View {
+public class PickerKnob extends View {
 
     /** Unit used for the velocity tracker */
     private static final int PIXELS_PER_SECOND = 1;
@@ -68,43 +67,39 @@ public class SelectorDialer extends View {
     Runnable mDynamicsRunnable = new Runnable() {
         @Override
         public void run() {
-            long mNewTime = System.nanoTime();
-            long nanoTime = (mNewTime - mCurrentTime);
-            double time = ((double) nanoTime) / 1000000000;
-            mCurrentTime = mNewTime;
+            long newTime = System.nanoTime();
+            long deltaNano = (newTime - mCurrentTime);
+            double deltaSecs = ((double) deltaNano) / 1000000000;
+            mCurrentTime = newTime;
+            float finalVelocity;
             if(mInitVelocity > 0) {
-                float finalVelocity = (float) (mInitVelocity - DECELARATION * time);
-                mRotation = (float) ( mRotation + finalVelocity * time );
-                invalidate();
-                SelectorDialer.this.postDelayed(mDynamicsRunnable, 1000 / 60);
-                mInitVelocity = finalVelocity;
+                finalVelocity = (float) (mInitVelocity - DECELARATION * deltaSecs);
             } else {
-                float finalVelocity = (float) (mInitVelocity + DECELARATION * time);
-                mRotation = (float) (mRotation + finalVelocity * time);
-                invalidate();
-                SelectorDialer.this.postDelayed(mDynamicsRunnable, 1000 / 60);
-                mInitVelocity = finalVelocity;
+                finalVelocity = (float) (mInitVelocity + DECELARATION * deltaSecs);
             }
+            rotate(finalVelocity * deltaSecs);
+            PickerKnob.this.postDelayed(mDynamicsRunnable, 1000 / 60);
+            mInitVelocity = finalVelocity;
         }
     };
 
-    public SelectorDialer(Context context) {
+    public PickerKnob(Context context) {
         super(context);
         init();
     }
 
-    public SelectorDialer(Context context, AttributeSet attrs) {
+    public PickerKnob(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
-    public SelectorDialer(Context context, AttributeSet attrs, int defStyleAttr) {
+    public PickerKnob(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public SelectorDialer(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public PickerKnob(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init();
     }
@@ -114,7 +109,6 @@ public class SelectorDialer extends View {
         mPaint.setStyle(Paint.Style.FILL);
         mPaint.setColor(Color.BLUE);
         mCurrentTime = System.nanoTime();
-//        postDelayed(mDynamicsRunnable, 1000 / 60);
     }
 
     @Override
@@ -174,7 +168,7 @@ public class SelectorDialer extends View {
                 }
                 if (mTouchState == TOUCH_STATE_SCROLL) {
                     mVelocityTracker.addMovement(event);
-                    rotate((int)event.getX());
+                    rotateOnTouch((int) event.getX());
                 }
                 break;
 
@@ -209,7 +203,6 @@ public class SelectorDialer extends View {
         mTouchStartX = (int)event.getX();
         mTouchStartY = (int)event.getY();
         mTouchStartAngle = Math.acos((mRadius - mTouchStartX)/ mRadius);
-        Log.d("test", "start rotation = " + mTouchStartAngle);
 
         // obtain a velocity tracker and feed it its first event
         mVelocityTracker = VelocityTracker.obtain();
@@ -258,7 +251,7 @@ public class SelectorDialer extends View {
         mTouchState = TOUCH_STATE_RESTING;
     }
 
-    private void rotate(int finalX) {
+    private void rotateOnTouch(int finalX) {
         float deltaX = mRadius - finalX;
         if(deltaX > mRadius) {
             deltaX = mRadius;
@@ -269,14 +262,18 @@ public class SelectorDialer extends View {
         double currentTouchAngle = Math.acos((deltaX)/ mRadius);
         double delta = mTouchStartAngle - currentTouchAngle ;
         mTouchStartAngle = currentTouchAngle;
-        mRotation = (float) (mRotation + delta);
+        rotate(delta);
+    }
+
+    private void rotate(double deltaTheta) {
+        mRotation = (float) (mRotation + deltaTheta);
         if(mRotation < 0) {
             mRotation = 0;
         }
         if(mRotation > Math.PI) {
             mRotation = (float) (Math.PI);
         }
-        Log.d("rotation", "rotation is " + mRotation);
+
         invalidate();
     }
 }
