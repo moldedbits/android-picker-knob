@@ -2,12 +2,14 @@ package com.moldedbits.pickerknob;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -20,9 +22,13 @@ public class PickerKnob extends View {
     /** Unit used for the velocity tracker */
     private static final int PIXELS_PER_SECOND = 1;
 
+    private static final int MIN_HEIGHT_IN_DP = 30;
+    private static final int MIN_WIDTH_IN_DP = 150;
+
     private int mDistance = 20;
 
-    private int mHeight = 30;
+    private int mHeight;
+    private int mWidth;
 
     private float mRadius;
 
@@ -85,36 +91,88 @@ public class PickerKnob extends View {
 
     public PickerKnob(Context context) {
         super(context);
-        init();
+        init(context, null);
     }
 
     public PickerKnob(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init();
+        init(context, attrs);
     }
 
     public PickerKnob(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init();
+        init(context, attrs);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public PickerKnob(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        init();
+        init(context, attrs);
     }
 
-    private void init() {
+    private void init(Context context, AttributeSet attrs) {
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPaint.setStyle(Paint.Style.FILL);
         mPaint.setColor(Color.BLUE);
         mCurrentTime = System.nanoTime();
+
+        if(attrs != null) {
+            int[] attrsArray = new int[]{
+                    android.R.attr.color
+            };
+
+            TypedArray a = context.getTheme().obtainStyledAttributes(attrs, attrsArray, 0, 0);
+            mPaint.setColor(a.getColor(0, Color.GREEN));
+            a.recycle();
+        }
+
+        mHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, MIN_HEIGHT_IN_DP,
+                context.getResources().getDisplayMetrics());
+
+        mWidth = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, MIN_WIDTH_IN_DP,
+                context.getResources().getDisplayMetrics());
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        setMeasuredDimension(800, 100);
+        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+
+        int width, height;
+
+        //Measure Width
+        if (widthMode == MeasureSpec.EXACTLY) {
+            //Must be this size
+            width = widthSize;
+        } else if (widthMode == MeasureSpec.AT_MOST) {
+            //Can't be bigger than...
+            width = Math.min(mWidth, widthSize);
+        } else {
+            //Be whatever you want
+            width = mWidth;
+        }
+
+        //Measure Height
+        if (heightMode == MeasureSpec.EXACTLY) {
+            //Must be this size
+            height = heightSize;
+        } else if (heightMode == MeasureSpec.AT_MOST) {
+            //Can't be bigger than...
+            height = Math.min(mHeight, heightSize);
+        } else {
+            //Be whatever you want
+            height = mHeight;
+        }
+
+        setMeasuredDimension(width, height);
+
+        int viewHeight = getMeasuredHeight();
+        if(viewHeight > mHeight) {
+            mHeight = viewHeight / 2;
+        }
+
         mRadius = getMeasuredWidth()/ 2;
         mCount = (int)(Math.floor(2 * Math.PI * mRadius)/ mDistance)/2;
     }
@@ -126,7 +184,7 @@ public class PickerKnob extends View {
             float theta = (i * mDistance )/mRadius;
             theta = theta - mRotation;
             float x = (float) (mRadius * (1 - Math.cos(theta)));
-            canvas.drawLine(x, mHeight *(i % 2 + 1), x, 0, mPaint);
+            canvas.drawLine(x, mHeight / (i % 2 + 1), x, 0, mPaint);
         }
     }
 
