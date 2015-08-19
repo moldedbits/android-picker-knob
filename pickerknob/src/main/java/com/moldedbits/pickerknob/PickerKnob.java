@@ -44,6 +44,10 @@ public class PickerKnob extends View {
 
     private long mCurrentTime;
 
+    private int mMinValue = 0;
+    private int mMaxValue = 10;
+    private int mDashCount = 2;
+
     /** User is not touching the list */
     private static final int TOUCH_STATE_RESTING = 0;
 
@@ -120,10 +124,13 @@ public class PickerKnob extends View {
             int[] attrsArray = new int[]{
                     android.R.attr.color
             };
-
             TypedArray a = context.getTheme().obtainStyledAttributes(attrs, attrsArray, 0, 0);
             mPaint.setColor(a.getColor(0, Color.GREEN));
             a.recycle();
+
+            a = context.getTheme().obtainStyledAttributes(attrs, R.styleable.PickerKnob, 0, 0);
+            mMinValue = a.getInt(R.attr.picker_min_value, mMinValue);
+            mMaxValue = a.getInt(R.attr.picker_max_value, mMaxValue);
         }
 
         mHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, MIN_HEIGHT_IN_DP,
@@ -168,6 +175,10 @@ public class PickerKnob extends View {
 
         setMeasuredDimension(width, height);
 
+        updateCount();
+    }
+
+    private void updateCount() {
         int viewHeight = getMeasuredHeight();
         if(viewHeight > mHeight) {
             mHeight = viewHeight / 2;
