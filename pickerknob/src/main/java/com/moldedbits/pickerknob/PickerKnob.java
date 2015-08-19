@@ -25,18 +25,21 @@ public class PickerKnob extends View {
     private static final int MIN_HEIGHT_IN_DP = 30;
     private static final int MIN_WIDTH_IN_DP = 150;
 
-    private int mDistance = 20;
+    private int mDashGap = 20;
 
-    private int mHeight;
-    private int mWidth;
+    private int mViewHeight;
+    private int mDashHeight;
+    private int mViewWidth;
 
     private float mRadius;
 
     private Paint mPaint;
 
-    private int mCount;
+    private int mTotalDashCount;
 
-    private float mRotation = (float) (Math.PI / 4);
+    private int mVisibleDashCount;
+
+    private float mRotation ;
 
     private float mInitVelocity = .5f;
 
@@ -47,6 +50,11 @@ public class PickerKnob extends View {
     private int mMinValue = 0;
     private int mMaxValue = 10;
     private int mDashCount = 2;
+    private float mMinRotation = (float) (-1 * Math.PI) / 2;
+    private float mMaxRotation;
+    private int mCurrentValue;
+    private int mTextSize;
+    private int mTextPadding;
 
     /** User is not touching the list */
     private static final int TOUCH_STATE_RESTING = 0;
@@ -122,21 +130,26 @@ public class PickerKnob extends View {
 
         if(attrs != null) {
             int[] attrsArray = new int[]{
-                    android.R.attr.color
+                    android.R.attr.color,
             };
             TypedArray a = context.getTheme().obtainStyledAttributes(attrs, attrsArray, 0, 0);
             mPaint.setColor(a.getColor(0, Color.GREEN));
             a.recycle();
 
             a = context.getTheme().obtainStyledAttributes(attrs, R.styleable.PickerKnob, 0, 0);
-            mMinValue = a.getInt(R.attr.picker_min_value, mMinValue);
-            mMaxValue = a.getInt(R.attr.picker_max_value, mMaxValue);
+            mMinValue = a.getInt(R.styleable.PickerKnob_picker_min_value, mMinValue);
+            mMaxValue = a.getInt(R.styleable.PickerKnob_picker_max_value, mMaxValue);
+            mTextSize = a.getDimensionPixelSize(R.styleable.PickerKnob_picker_text_size, 12);
+            mTextPadding = a.getDimensionPixelSize(R.styleable.PickerKnob_picker_text_padding, 10);
+            mDashGap = a.getDimensionPixelSize(R.styleable.PickerKnob_picker_dash_gap, 20);
+            a.recycle();
         }
+        mPaint.setTextSize(mTextSize);
 
-        mHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, MIN_HEIGHT_IN_DP,
-                context.getResources().getDisplayMetrics());
+        mViewHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, MIN_HEIGHT_IN_DP,
+                context.getResources().getDisplayMetrics()) + mTextSize;
 
-        mWidth = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, MIN_WIDTH_IN_DP,
+        mViewWidth = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, MIN_WIDTH_IN_DP,
                 context.getResources().getDisplayMetrics());
     }
 
@@ -155,10 +168,10 @@ public class PickerKnob extends View {
             width = widthSize;
         } else if (widthMode == MeasureSpec.AT_MOST) {
             //Can't be bigger than...
-            width = Math.min(mWidth, widthSize);
+            width = Math.min(mViewWidth, widthSize);
         } else {
             //Be whatever you want
-            width = mWidth;
+            width = mViewWidth;
         }
 
         //Measure Height
@@ -167,10 +180,10 @@ public class PickerKnob extends View {
             height = heightSize;
         } else if (heightMode == MeasureSpec.AT_MOST) {
             //Can't be bigger than...
-            height = Math.min(mHeight, heightSize);
+            height = Math.min(mViewHeight, heightSize);
         } else {
             //Be whatever you want
-            height = mHeight;
+            height = mViewHeight;
         }
 
         setMeasuredDimension(width, height);
@@ -179,23 +192,40 @@ public class PickerKnob extends View {
     }
 
     private void updateCount() {
-        int viewHeight = getMeasuredHeight();
-        if(viewHeight > mHeight) {
-            mHeight = viewHeight / 2;
-        }
+        mViewHeight = getMeasuredHeight();
+        mDashHeight = mViewHeight - mTextSize - mTextPadding;
 
         mRadius = getMeasuredWidth()/ 2;
-        mCount = (int)(Math.floor(2 * Math.PI * mRadius)/ mDistance)/2;
+
+        mTotalDashCount = (mMaxValue - mMinValue) * (mDashCount + 1) + 1;
+        mVisibleDashCount = (int) Math.ceil(Math.PI * mRadius / mDashGap);
+        mMaxRotation = (float) (Math.ceil(mTotalDashCount * Math.PI / mVisibleDashCount) + Math.PI / 2);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        int startPosition = (int)Math.ceil((mRadius * mRotation)/ mDistance);
-        for(int i = startPosition; i < mCount + startPosition; ++i) {
-            float theta = (i * mDistance )/mRadius;
+        int startPosition = (int)Math.ceil((mRadius * mRotation)/ mDashGap);
+        startPosition = Math.max(0, startPosition);
+        float oldX = -1;
+        while(true) {
+            float theta = (startPosition * mDashGap)/mRadius;
+            if(theta > mMaxRotation + Math.PI / 2) {
+                break;
+            }
             theta = theta - mRotation;
             float x = (float) (mRadius * (1 - Math.cos(theta)));
-            canvas.drawLine(x, mHeight / (i % 2 + 1), x, 0, mPaint);
+            if(x < oldX) {
+                break;
+            }
+            oldX = x;
+
+            if(startPosition % (mDashCount + 1) == 0) {
+                String text = String.valueOf(startPosition);
+                float textWidth = mPaint.measureText(text);
+                canvas.drawText(text, x - textWidth / 2, mTextSize, mPaint);
+            }
+            canvas.drawLine(x, ((startPosition % (mDashCount + 1) == 0) ? 0 : mDashHeight / 2) + mTextSize + mTextPadding, x, mViewHeight, mPaint);
+            startPosition++;
         }
     }
 
@@ -336,13 +366,8 @@ public class PickerKnob extends View {
 
     private void rotate(double deltaTheta) {
         mRotation = (float) (mRotation + deltaTheta);
-        if(mRotation < 0) {
-            mRotation = 0;
-        }
-        if(mRotation > Math.PI) {
-            mRotation = (float) (Math.PI);
-        }
-
+        mRotation = Math.max(mRotation, mMinRotation);
+        mRotation = Math.min(mRotation, mMaxRotation);
         invalidate();
     }
 }
