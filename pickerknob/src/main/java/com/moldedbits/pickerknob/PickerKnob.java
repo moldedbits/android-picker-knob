@@ -43,7 +43,7 @@ public class PickerKnob extends View {
 
     private float mInitVelocity = .5f;
 
-    private static final float VELOCITY_THRESHOLD = 0.1f;
+    private static final float VELOCITY_THRESHOLD = 0.05f;
 
     private static final float DECELARATION = 5f;
 
@@ -281,7 +281,7 @@ public class PickerKnob extends View {
                 if (mTouchState == TOUCH_STATE_SCROLL) {
                     mVelocityTracker.addMovement(event);
                     mVelocityTracker.computeCurrentVelocity(RADIANS_PER_SECOND);
-                    velocity = -1 * mVelocityTracker.getXVelocity() / 2;
+                    velocity = -1 * mVelocityTracker.getXVelocity();
                 }
                 endTouch(velocity);
                 break;
@@ -347,7 +347,7 @@ public class PickerKnob extends View {
         // recycle the velocity tracker
         mVelocityTracker.recycle();
         mVelocityTracker = null;
-
+        mCurrentTime = System.nanoTime();
         mInitVelocity = velocity;
         post(mDynamicsRunnable);
 
