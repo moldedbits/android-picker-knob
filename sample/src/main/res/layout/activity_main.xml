@@ -13,9 +13,9 @@
         android:color="@android:color/black"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:picker_min_value="1"
+        app:picker_min_value="0"
         android:background="@android:color/holo_green_dark"
-        app:picker_max_value="48"
+        app:picker_max_value="50"
         app:picker_text_size="10sp"
         app:picker_dash_gap="10dp"/>
 </LinearLayout>

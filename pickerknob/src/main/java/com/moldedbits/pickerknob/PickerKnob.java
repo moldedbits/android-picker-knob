@@ -20,7 +20,7 @@ import android.view.View;
 public class PickerKnob extends View {
 
     /** Unit used for the velocity tracker */
-    private static final int PIXELS_PER_SECOND = 1;
+    private static final int RADIANS_PER_SECOND = 3;
 
     private static final int MIN_HEIGHT_IN_DP = 30;
     private static final int MIN_WIDTH_IN_DP = 150;
@@ -43,13 +43,15 @@ public class PickerKnob extends View {
 
     private float mInitVelocity = .5f;
 
-    private static final float DECELARATION = 0.5f;
+    private static final float VELOCITY_THRESHOLD = 0.1f;
+
+    private static final float DECELARATION = 5f;
 
     private long mCurrentTime;
 
     private int mMinValue = 0;
     private int mMaxValue = 10;
-    private int mDashCount = 2;
+    private int mDashCount = 4;
     private float mMinRotation = (float) (-1 * Math.PI) / 2;
     private float mMaxRotation;
     private int mCurrentValue;
@@ -85,6 +87,9 @@ public class PickerKnob extends View {
     Runnable mDynamicsRunnable = new Runnable() {
         @Override
         public void run() {
+            if(Math.abs(mInitVelocity) < VELOCITY_THRESHOLD) {
+                return;
+            }
             long newTime = System.nanoTime();
             long deltaNano = (newTime - mCurrentTime);
             double deltaSecs = ((double) deltaNano) / 1000000000;
@@ -199,7 +204,7 @@ public class PickerKnob extends View {
 
         mTotalDashCount = (mMaxValue - mMinValue);
         mVisibleDashCount = (int) Math.ceil(Math.PI * mRadius / mDashGap);
-        mMaxRotation = (float) (Math.ceil(mTotalDashCount * Math.PI / mVisibleDashCount) + Math.PI / 2);
+        mMaxRotation = (float) ((mTotalDashCount * Math.PI / mVisibleDashCount) - Math.PI / 2);
     }
 
     @Override
@@ -209,7 +214,7 @@ public class PickerKnob extends View {
         float oldX = -1;
         while(true) {
             float theta = (startPosition * mDashGap)/mRadius;
-            if(theta > mMaxRotation + Math.PI / 2) {
+            if(startPosition > mTotalDashCount) {
                 break;
             }
             theta = theta - mRotation;
@@ -275,7 +280,7 @@ public class PickerKnob extends View {
                 float velocity = 0;
                 if (mTouchState == TOUCH_STATE_SCROLL) {
                     mVelocityTracker.addMovement(event);
-                    mVelocityTracker.computeCurrentVelocity(PIXELS_PER_SECOND);
+                    mVelocityTracker.computeCurrentVelocity(RADIANS_PER_SECOND);
                     velocity = -1 * mVelocityTracker.getXVelocity() / 2;
                 }
                 endTouch(velocity);
