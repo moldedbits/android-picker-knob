@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="PickerKnob">
+        <attr name="picker_min_value" format="integer"/>
+        <attr name="picker_max_value" format="integer"/>
+        <attr name="picker_dash_gap" format="dimension"/>
+        <attr name="picker_text_size" format="dimension"/>
+        <attr name="picker_text_padding" format="dimension"/>
+    </declare-styleable>
+</resources>

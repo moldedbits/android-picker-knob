@@ -11,11 +11,11 @@
     <com.moldedbits.pickerknob.PickerKnob
         android:layout_marginTop="16dp"
         android:color="@android:color/black"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:picker_min_value="1"
         android:background="@android:color/holo_green_dark"
-        app:picker_max_value="11"
+        app:picker_max_value="48"
         app:picker_text_size="10sp"
         app:picker_dash_gap="10dp"/>
 </LinearLayout>

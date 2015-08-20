@@ -197,7 +197,7 @@ public class PickerKnob extends View {
 
         mRadius = getMeasuredWidth()/ 2;
 
-        mTotalDashCount = (mMaxValue - mMinValue) * (mDashCount + 1) + 1;
+        mTotalDashCount = (mMaxValue - mMinValue);
         mVisibleDashCount = (int) Math.ceil(Math.PI * mRadius / mDashGap);
         mMaxRotation = (float) (Math.ceil(mTotalDashCount * Math.PI / mVisibleDashCount) + Math.PI / 2);
     }
