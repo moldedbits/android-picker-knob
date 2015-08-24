@@ -1,0 +1,28 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:padding="16dp">
+
+    <com.moldedbits.pickerknob.PickerKnob
+        android:id="@+id/picker_knob"
+        android:layout_marginTop="16dp"
+        android:color="@android:color/holo_green_dark"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:picker_min_value="0"
+        android:background="@android:color/white"
+        app:picker_max_value="50"
+        app:picker_text_size="10sp"
+        app:picker_dash_gap="10dp"
+        app:picker_text_color="@android:color/black"/>
+
+    <TextView
+        android:id="@+id/tv_position"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+</LinearLayout>
