@@ -2,26 +2,13 @@ package com.moldedbits.horizontaldialer;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.moldedbits.pickerknob.PickerKnob;
 
-import org.w3c.dom.Text;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import butterknife.ButterKnife;
-import butterknife.InjectView;
-
-
-public class MainActivity extends AppCompatActivity implements PickerKnob.PositionListener{
+public class MainActivity extends AppCompatActivity implements PickerKnob.OnValueChangeListener {
 
     private TextView mPositionTv;
 
@@ -35,8 +22,8 @@ public class MainActivity extends AppCompatActivity implements PickerKnob.Positi
     }
 
     @Override
-    public void currentPosition(int position) {
-        Log.d("test", "position = " + position);
-        mPositionTv.setText(String.valueOf(position));
+    public void onValueUpdated(int newValue) {
+        Log.d("test", "position = " + newValue);
+        mPositionTv.setText(String.valueOf(newValue));
     }
 }

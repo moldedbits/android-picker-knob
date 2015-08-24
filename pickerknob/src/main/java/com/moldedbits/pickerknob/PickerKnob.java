@@ -22,41 +22,73 @@ public class PickerKnob extends View {
     /** Unit used for the velocity tracker */
     private static final int RADIANS_PER_SECOND = 1;
 
+    /** Minimum height of the view */
     private static final int MIN_HEIGHT_IN_DP = 30;
+
+    /** Minimum width of the view */
     private static final int MIN_WIDTH_IN_DP = 150;
 
+    /** The velocity below which the knob will stop rotating */
     private static final float VELOCITY_THRESHOLD = 0.05f;
 
+    /** The left rotation threshold */
     private static final float MIN_ROTATION = (float) (-1 * Math.PI) / 2;
 
+    /** Distance between dashes (in pixels) */
     private int mDashGap = 20;
 
+    /** View height including dash and text */
     private int mViewHeight;
+
+    /** Height of the bigger dash */
     private int mDashHeight;
+
+    /** Total view width */
     private int mViewWidth;
 
+    /** Radius of the knob */
     private float mRadius;
 
+    /** Used to draw to the canvas */
     private Paint mPaint;
 
+    /** Total number of dashes to draw */
     private int mTotalDashCount;
 
+    /** Current knob rotation */
     private float mRotation ;
 
+    /** Initial velocity when the user flings the knob */
     private float mInitVelocity = .5f;
 
+    /** Knob deceleration */
     private float mDeceleration = 15f;
 
+    /** Track the system time to update knob position */
     private long mCurrentTime;
 
+    /** Minimum value for the knob. This can be set from the XML */
     private int mMinValue = 0;
+
+    /** Maximum value for the knob. This can be set from the XML */
     private int mMaxValue = 10;
+
+    /** Count of smaller dashes between two larger dashes. This can be set from the XML */
     private int mDashCount = 4;
 
+    /** Maximum rotation allowed for the knob. This depends on the max value */
     private float mMaxRotation;
+
+    /** Text size for the values on top */
     private int mTextSize;
+
+    /** Padding between the text and the dashes */
     private int mTextPadding;
+
+    /** Dash color */
     private int mLineColor;
+
+    /** Text color */
     private int mTextColor;
 
     /** User is not touching the list */
@@ -83,25 +115,28 @@ public class PickerKnob extends View {
     /** Current touch state */
     private int mTouchState = TOUCH_STATE_RESTING;
 
+    /** Rotation of the point where the touch started */
     private double mTouchStartAngle;
 
-    private PositionListener mPositionListener;
+    /** Update listener */
+    private OnValueChangeListener mUpdateListener;
 
-    public interface PositionListener {
-        void currentPosition(int position);
+    public interface OnValueChangeListener {
+        void onValueUpdated(int newValue);
     }
 
+    /** Physics implementation */
     Runnable mDynamicsRunnable = new Runnable() {
         @Override
         public void run() {
             if(Math.abs(mInitVelocity) < VELOCITY_THRESHOLD) {
-                if (mPositionListener != null) {
-                    mPositionListener.currentPosition((int) Math.ceil(mRadius * (mRotation + Math.PI / 2)/ mDashGap));
+                if (mUpdateListener != null) {
+                    mUpdateListener.onValueUpdated((int) Math.ceil(mRadius * (mRotation + Math.PI / 2) / mDashGap));
                 }
                return;
             }
-            if (mPositionListener != null) {
-                    mPositionListener.currentPosition((int) Math.ceil(mRadius * (mRotation + Math.PI / 2)/ mDashGap));
+            if (mUpdateListener != null) {
+                    mUpdateListener.onValueUpdated((int) Math.ceil(mRadius * (mRotation + Math.PI / 2) / mDashGap));
             }
             long newTime = System.nanoTime();
             long deltaNano = (newTime - mCurrentTime);
@@ -134,8 +169,8 @@ public class PickerKnob extends View {
         init(context, attrs);
     }
 
-    public void setPositionListener(PositionListener listener) {
-        mPositionListener = listener;
+    public void setPositionListener(OnValueChangeListener listener) {
+        mUpdateListener = listener;
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
