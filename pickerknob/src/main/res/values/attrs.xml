@@ -7,5 +7,7 @@
         <attr name="picker_text_size" format="dimension"/>
         <attr name="picker_text_padding" format="dimension"/>
         <attr name="picker_text_color" format="integer"/>
+        <attr name="picker_dash_count" format="integer"/>
+        <attr name="picker_friction" format="float"/>
     </declare-styleable>
 </resources>

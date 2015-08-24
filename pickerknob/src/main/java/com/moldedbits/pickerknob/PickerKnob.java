@@ -20,10 +20,14 @@ import android.view.View;
 public class PickerKnob extends View {
 
     /** Unit used for the velocity tracker */
-    private static final int RADIANS_PER_SECOND = 3;
+    private static final int RADIANS_PER_SECOND = 1;
 
     private static final int MIN_HEIGHT_IN_DP = 30;
     private static final int MIN_WIDTH_IN_DP = 150;
+
+    private static final float VELOCITY_THRESHOLD = 0.05f;
+
+    private static final float MIN_ROTATION = (float) (-1 * Math.PI) / 2;
 
     private int mDashGap = 20;
 
@@ -37,22 +41,18 @@ public class PickerKnob extends View {
 
     private int mTotalDashCount;
 
-    private int mVisibleDashCount;
-
     private float mRotation ;
 
     private float mInitVelocity = .5f;
 
-    private static final float VELOCITY_THRESHOLD = 0.05f;
-
-    private static final float DECELARATION = 5f;
+    private float mDeceleration = 15f;
 
     private long mCurrentTime;
 
     private int mMinValue = 0;
     private int mMaxValue = 10;
     private int mDashCount = 4;
-    private float mMinRotation = (float) (-1 * Math.PI) / 2;
+
     private float mMaxRotation;
     private int mTextSize;
     private int mTextPadding;
@@ -109,9 +109,9 @@ public class PickerKnob extends View {
             mCurrentTime = newTime;
             float finalVelocity;
             if(mInitVelocity > 0) {
-                finalVelocity = (float) (mInitVelocity - DECELARATION * deltaSecs);
+                finalVelocity = (float) (mInitVelocity - mDeceleration * deltaSecs);
             } else {
-                finalVelocity = (float) (mInitVelocity + DECELARATION * deltaSecs);
+                finalVelocity = (float) (mInitVelocity + mDeceleration * deltaSecs);
             }
             rotate(finalVelocity * deltaSecs);
             PickerKnob.this.postDelayed(mDynamicsRunnable, 1000 / 60);
@@ -166,6 +166,8 @@ public class PickerKnob extends View {
             mTextPadding = a.getDimensionPixelSize(R.styleable.PickerKnob_picker_text_padding, 10);
             mDashGap = a.getDimensionPixelSize(R.styleable.PickerKnob_picker_dash_gap, 20);
             mTextColor = a.getColor(R.styleable.PickerKnob_picker_text_color, Color.BLACK);
+            mDashCount = a.getInteger(R.styleable.PickerKnob_picker_dash_count, mDashCount);
+            mDeceleration = a.getFloat(R.styleable.PickerKnob_picker_friction, mDeceleration);
             a.recycle();
         }
         mPaint.setTextSize(mTextSize);
@@ -222,8 +224,8 @@ public class PickerKnob extends View {
         mRadius = getMeasuredWidth()/ 2;
 
         mTotalDashCount = (mMaxValue - mMinValue);
-        mVisibleDashCount = (int) Math.ceil(Math.PI * mRadius / mDashGap);
-        mMaxRotation = (float) ((mTotalDashCount * Math.PI / mVisibleDashCount) - Math.PI / 2);
+        int visibleDashCount = (int) Math.ceil(Math.PI * mRadius / mDashGap);
+        mMaxRotation = (float) ((mTotalDashCount * Math.PI / visibleDashCount) - Math.PI / 2);
     }
 
     @Override
@@ -392,7 +394,7 @@ public class PickerKnob extends View {
 
     private void rotate(double deltaTheta) {
         mRotation = (float) (mRotation + deltaTheta);
-        mRotation = Math.max(mRotation, mMinRotation);
+        mRotation = Math.max(mRotation, MIN_ROTATION);
         mRotation = Math.min(mRotation, mMaxRotation);
         invalidate();
     }
