@@ -6,5 +6,6 @@
         <attr name="picker_dash_gap" format="dimension"/>
         <attr name="picker_text_size" format="dimension"/>
         <attr name="picker_text_padding" format="dimension"/>
+        <attr name="picker_text_color" format="integer"/>
     </declare-styleable>
 </resources>

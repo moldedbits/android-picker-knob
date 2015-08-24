@@ -54,9 +54,10 @@ public class PickerKnob extends View {
     private int mDashCount = 4;
     private float mMinRotation = (float) (-1 * Math.PI) / 2;
     private float mMaxRotation;
-    private int mCurrentValue;
     private int mTextSize;
     private int mTextPadding;
+    private int mLineColor;
+    private int mTextColor;
 
     /** User is not touching the list */
     private static final int TOUCH_STATE_RESTING = 0;
@@ -84,11 +85,23 @@ public class PickerKnob extends View {
 
     private double mTouchStartAngle;
 
+    private PositionListener mPositionListener;
+
+    public interface PositionListener {
+        void currentPosition(int position);
+    }
+
     Runnable mDynamicsRunnable = new Runnable() {
         @Override
         public void run() {
             if(Math.abs(mInitVelocity) < VELOCITY_THRESHOLD) {
-                return;
+                if (mPositionListener != null) {
+                    mPositionListener.currentPosition((int) Math.ceil(mRadius * (mRotation + Math.PI / 2)/ mDashGap));
+                }
+               return;
+            }
+            if (mPositionListener != null) {
+                    mPositionListener.currentPosition((int) Math.ceil(mRadius * (mRotation + Math.PI / 2)/ mDashGap));
             }
             long newTime = System.nanoTime();
             long deltaNano = (newTime - mCurrentTime);
@@ -121,6 +134,10 @@ public class PickerKnob extends View {
         init(context, attrs);
     }
 
+    public void setPositionListener(PositionListener listener) {
+        mPositionListener = listener;
+    }
+
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public PickerKnob(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
@@ -138,7 +155,8 @@ public class PickerKnob extends View {
                     android.R.attr.color,
             };
             TypedArray a = context.getTheme().obtainStyledAttributes(attrs, attrsArray, 0, 0);
-            mPaint.setColor(a.getColor(0, Color.GREEN));
+            mLineColor = a.getColor(0, Color.GREEN);
+            mPaint.setColor(mLineColor);
             a.recycle();
 
             a = context.getTheme().obtainStyledAttributes(attrs, R.styleable.PickerKnob, 0, 0);
@@ -147,6 +165,7 @@ public class PickerKnob extends View {
             mTextSize = a.getDimensionPixelSize(R.styleable.PickerKnob_picker_text_size, 12);
             mTextPadding = a.getDimensionPixelSize(R.styleable.PickerKnob_picker_text_padding, 10);
             mDashGap = a.getDimensionPixelSize(R.styleable.PickerKnob_picker_dash_gap, 20);
+            mTextColor = a.getColor(R.styleable.PickerKnob_picker_text_color, Color.BLACK);
             a.recycle();
         }
         mPaint.setTextSize(mTextSize);
@@ -227,8 +246,10 @@ public class PickerKnob extends View {
             if(startPosition % (mDashCount + 1) == 0) {
                 String text = String.valueOf(startPosition);
                 float textWidth = mPaint.measureText(text);
+                mPaint.setColor(mTextColor);
                 canvas.drawText(text, x - textWidth / 2, mTextSize, mPaint);
             }
+            mPaint.setColor(mLineColor);
             canvas.drawLine(x, ((startPosition % (mDashCount + 1) == 0) ? 0 : mDashHeight / 2) + mTextSize + mTextPadding, x, mViewHeight, mPaint);
             startPosition++;
         }
