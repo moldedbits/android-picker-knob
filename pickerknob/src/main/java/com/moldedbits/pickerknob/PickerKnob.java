@@ -130,13 +130,7 @@ public class PickerKnob extends View {
         @Override
         public void run() {
             if(Math.abs(mInitVelocity) < VELOCITY_THRESHOLD) {
-                if (mUpdateListener != null) {
-                    mUpdateListener.onValueUpdated((int) Math.ceil(mRadius * (mRotation + Math.PI / 2) / mDashGap));
-                }
-               return;
-            }
-            if (mUpdateListener != null) {
-                    mUpdateListener.onValueUpdated((int) Math.ceil(mRadius * (mRotation + Math.PI / 2) / mDashGap));
+                return;
             }
             long newTime = System.nanoTime();
             long deltaNano = (newTime - mCurrentTime);
@@ -281,7 +275,7 @@ public class PickerKnob extends View {
             oldX = x;
 
             if(startPosition % (mDashCount + 1) == 0) {
-                String text = String.valueOf(startPosition);
+                String text = String.valueOf(getValueAtPosition(startPosition));
                 float textWidth = mPaint.measureText(text);
                 mPaint.setColor(mTextColor);
                 canvas.drawText(text, x - textWidth / 2, mTextSize, mPaint);
@@ -432,5 +426,14 @@ public class PickerKnob extends View {
         mRotation = Math.max(mRotation, MIN_ROTATION);
         mRotation = Math.min(mRotation, mMaxRotation);
         invalidate();
+
+        if (mUpdateListener != null) {
+            int position = (int) Math.ceil(mRadius * (mRotation + Math.PI / 2) / mDashGap);
+            mUpdateListener.onValueUpdated(getValueAtPosition(position));
+        }
+    }
+
+    private int getValueAtPosition(int position) {
+        return mMinValue + position;
     }
 }
