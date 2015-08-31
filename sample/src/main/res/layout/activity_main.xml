@@ -14,9 +14,9 @@
         android:color="@android:color/holo_green_dark"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:picker_min_value="0"
+        app:picker_min_value="-25"
         android:background="@android:color/white"
-        app:picker_max_value="50"
+        app:picker_max_value="25"
         app:picker_text_size="10sp"
         app:picker_dash_gap="10dp"
         app:picker_text_color="@android:color/black"/>
