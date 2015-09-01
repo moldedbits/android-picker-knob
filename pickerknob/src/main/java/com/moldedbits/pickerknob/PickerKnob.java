@@ -142,6 +142,9 @@ public class PickerKnob extends View {
             } else {
                 finalVelocity = (float) (mInitVelocity + mDeceleration * deltaSecs);
             }
+            if(mInitVelocity * finalVelocity < 0) {
+                return;
+            }
             rotate(finalVelocity * deltaSecs);
             PickerKnob.this.postDelayed(mDynamicsRunnable, 1000 / 60);
             mInitVelocity = finalVelocity;
