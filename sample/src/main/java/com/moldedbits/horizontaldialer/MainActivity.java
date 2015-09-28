@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity implements PickerKnob.OnValu
         PickerKnob pickerKnob = (PickerKnob)findViewById(R.id.picker_knob);
         mPositionTv = (TextView) findViewById(R.id.tv_position);
         pickerKnob.setPositionListener(this);
+        pickerKnob.setValue(5);
     }
 
     @Override
