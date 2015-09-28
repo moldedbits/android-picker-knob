@@ -9,7 +9,6 @@ import android.graphics.Paint;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -322,7 +321,6 @@ public class PickerKnob extends View {
                 return true;
 
             default:
-                endTouch(0);
                 return false;
         }
     }
@@ -330,10 +328,6 @@ public class PickerKnob extends View {
 
     public boolean processTouch(final MotionEvent event) {
         switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                startTouch(event);
-                break;
-
             case MotionEvent.ACTION_MOVE:
                 if (mTouchState == TOUCH_STATE_CLICK) {
                     startScrollIfNeeded(event);
@@ -352,10 +346,6 @@ public class PickerKnob extends View {
                     velocity = -1 * mVelocityTracker.getXVelocity();
                 }
                 endTouch(velocity);
-                break;
-
-            default:
-                endTouch(0);
                 break;
         }
         return true;
