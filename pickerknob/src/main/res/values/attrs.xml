@@ -9,5 +9,6 @@
         <attr name="picker_text_color" format="integer"/>
         <attr name="picker_dash_count" format="integer"/>
         <attr name="picker_friction" format="float"/>
+        <attr name="picker_start_value" format="integer"/>
     </declare-styleable>
 </resources>

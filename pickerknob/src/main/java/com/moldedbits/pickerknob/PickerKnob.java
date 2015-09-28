@@ -9,6 +9,7 @@ import android.graphics.Paint;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -121,6 +122,8 @@ public class PickerKnob extends View {
     /** Update listener */
     private OnValueChangeListener mUpdateListener;
 
+    private int mStartValue;
+
     public interface OnValueChangeListener {
         void onValueUpdated(int newValue);
     }
@@ -200,6 +203,8 @@ public class PickerKnob extends View {
             mTextColor = a.getColor(R.styleable.PickerKnob_picker_text_color, Color.BLACK);
             mDashCount = a.getInteger(R.styleable.PickerKnob_picker_dash_count, mDashCount);
             mDeceleration = a.getFloat(R.styleable.PickerKnob_picker_friction, mDeceleration);
+            mStartValue = a.getInt(R.styleable.PickerKnob_picker_start_value,
+                    (mMinValue + mMaxValue) / 2);
             a.recycle();
         }
         mPaint.setTextSize(mTextSize);
@@ -209,6 +214,12 @@ public class PickerKnob extends View {
 
         mViewWidth = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, MIN_WIDTH_IN_DP,
                 context.getResources().getDisplayMetrics());
+    }
+
+    public void setValue(int value) {
+        if(value <= mMaxValue && value >= mMinValue) {
+            mStartValue = value;
+        }
     }
 
     @Override
@@ -258,6 +269,8 @@ public class PickerKnob extends View {
         mTotalDashCount = (mMaxValue - mMinValue);
         int visibleDashCount = (int) Math.ceil(Math.PI * mRadius / mDashGap);
         mMaxRotation = (float) ((mTotalDashCount * Math.PI / visibleDashCount) - Math.PI / 2);
+
+        mRotation = (mDashGap * (mStartValue - 1) / mRadius);
     }
 
     @Override
