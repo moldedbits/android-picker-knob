@@ -28,7 +28,7 @@ maven { url "https://jitpack.io" }
 
 and to the dependencies, add
 ```
-compile 'com.github.moldedbits:android-picker-knob:0.3’
+compile 'com.github.moldedbits:android-picker-knob:0.4’
 ```
 
 ## Copyright
