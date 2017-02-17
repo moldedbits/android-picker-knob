@@ -47,8 +47,6 @@ Thumbs.db
 
 # gradle directory
 .gradle
-gradlew
-gradlew.bat
 gradle/
 build/
 
