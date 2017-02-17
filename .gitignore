@@ -47,7 +47,6 @@ Thumbs.db
 
 # gradle directory
 .gradle
-gradle/
 build/
 
 # crashlytics
